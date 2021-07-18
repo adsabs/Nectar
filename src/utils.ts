@@ -1,17 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { ParsedUrlQuery } from 'node:querystring';
 
-export const normalizeURLParams = (
-  query: ParsedUrlQuery,
-): Record<string, string> => {
+export const normalizeURLParams = (query: ParsedUrlQuery): Record<string, string> => {
   return Object.keys(query).reduce((acc, key) => {
     const rawValue = query[key];
-    const value =
-      typeof rawValue === 'string'
-        ? rawValue
-        : Array.isArray(rawValue)
-        ? rawValue.join(',')
-        : undefined;
+    const value = typeof rawValue === 'string' ? rawValue : Array.isArray(rawValue) ? rawValue.join(',') : undefined;
 
     if (typeof value === 'undefined') {
       return acc;
@@ -25,14 +18,11 @@ export const normalizeURLParams = (
 };
 
 export const initMiddleware = (
-  middleware: (
-    req: NextApiRequest,
-    res: NextApiResponse,
-    cb: (result: unknown) => void,
-  ) => unknown,
+  middleware: (req: NextApiRequest, res: NextApiResponse, cb: (result: unknown) => void) => unknown,
 ) => (req: NextApiRequest, res: NextApiResponse): Promise<unknown> =>
   new Promise((resolve, reject) =>
-    middleware(req, res, (result) =>
-      result instanceof Error ? reject(result) : resolve(result),
-    ),
+    middleware(req, res, (result) => (result instanceof Error ? reject(result) : resolve(result))),
   );
+
+export const isSomeEnum = <T>(e: T) => (token: unknown): token is T[keyof T] =>
+  Object.values(e).includes(token as T[keyof T]);
